@@ -4,9 +4,13 @@
 #include "chess.hpp"
 #include <random>
 
+#include "randombot.h"
 #include "mcts.h"
 
 using namespace ChessSimulator;
+
+RandomBot randomBot;
+MCTS mctsWhite, mctsBlack;
 
 std::string ChessSimulator::Move(std::string fen) {
   // create your board based on the board string following the FEN notation
@@ -16,13 +20,9 @@ std::string ChessSimulator::Move(std::string fen) {
   // extra points if you create your own board/move representation instead of
   // using the one provided by the library
 
-  // get legal moves (from original code)
   chess::Board board(fen);
-  chess::Movelist moves;
-  chess::movegen::legalmoves(moves, board);
-  if(moves.size() == 0) { return ""; }
-  
-  //
-  
-  return chess::uci::moveToUci(move);
+  if(board.sideToMove() == chess::Color::WHITE) { return mctsWhite.Search(fen, 450); }
+  //else if(board.sideToMove() == chess::Color::BLACK) { return mctsBlack.Search(fen, 450); }
+  else if(board.sideToMove() == chess::Color::BLACK) { return randomBot.Move(fen); }
+  else { return ""; } // chess::Color::NONE is a thing for some reason, so this handles that
 }

@@ -24,9 +24,9 @@ void MCTSNode::DeleteOtherChildren(const MCTSNode* save) {
 
 // ---------------------------------------- MCTS (process) ---------------------------------------- //
 
-std::string MCTS::Search(const std::string& fen, int iterations) {
+std::string MCTS::Search(const std::string& fen) {
     // Attempt to reuse tree
-    root = ReuseTree(root, fen);
+    int iterations = ReuseTree(fen);
 
     MCTSNode* leaf;
     for(int i = 0; i < iterations; i++) {
@@ -136,16 +136,29 @@ MCTSNode* MCTS::BestChild(const MCTSNode* root) {
 
 // Attempt to reuse the MCTS tree from last move.
 // If that isn't possible, generate a new tree.
-MCTSNode* MCTS::ReuseTree(MCTSNode* root, const std::string& fen) {
-    if(nullptr == root) { return new MCTSNode(fen); }
+int MCTS::ReuseTree(const std::string& fen) {
+    // number of iterations to perform when creating
+    // a new tree vs. when reusing the tree
+    const int ITERATIONS_NEW = 5000;
+    const int ITERATIONS_REUSED = 500;
 
+    // no tree exists, create new tree
+    if(nullptr == root) {
+        root = new MCTSNode(fen);
+        return ITERATIONS_NEW;
+    }
+
+    // check if one of the child nodes can become reused tree
     for(MCTSNode* child : root->children) {
         if(fen == child->state) {
             child->parent = nullptr;
             root->DeleteOtherChildren(child);
-            return child;
+            root = child;
+            return ITERATIONS_REUSED;
         }
     }
 
-    return new MCTSNode(fen);
+    // opponent's move didn't match any children; create new tree
+    root = new MCTSNode(fen);
+    return ITERATIONS_NEW;
 }

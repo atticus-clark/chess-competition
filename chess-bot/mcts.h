@@ -33,7 +33,7 @@ public:
 
 class MCTS {
 public:
-    std::string Search(const std::string& fen, int iterations);
+    std::string Search(const std::string& fen);
     ~MCTS() {
         if(nullptr != root) { delete root; }
     }
@@ -41,13 +41,16 @@ public:
 private:
     MCTSNode* root = nullptr;
 
-    // MCTS steps
+    // MCTS steps //
     MCTSNode* Select(MCTSNode* node);
     MCTSNode* Expand(MCTSNode* node);
     double Simulate(MCTSNode* node);
     void Backpropagate(MCTSNode* node, double result);
 
-    // Helpers
+    // Helpers //
     MCTSNode* BestChild(const MCTSNode* root);
-    MCTSNode* ReuseTree(MCTSNode* root, const std::string& fen);
+
+    // returns the number of iterations to perform
+    // perform more when generating a new tree
+    int ReuseTree(const std::string& fen);
 };

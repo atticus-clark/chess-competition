@@ -21,7 +21,9 @@ std::string ChessSimulator::Move(std::string fen) {
   // using the one provided by the library
 
   chess::Board board(fen);
+
   if(board.sideToMove() == chess::Color::WHITE) { return mctsWhite.Search(fen); }
   else if(board.sideToMove() == chess::Color::BLACK) { return randomBot.Move(fen); }
+  
   else { return ""; } // chess::Color::NONE is a thing for some reason, so this handles that
 }

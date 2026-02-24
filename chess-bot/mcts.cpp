@@ -24,9 +24,9 @@ void MCTSNode::DeleteOtherChildren(const MCTSNode* save) {
 
 // ---------------------------------------- MCTS (process) ---------------------------------------- //
 
-std::string MCTS::Search(const std::string& fen) {
-    // Attempt to reuse tree
-    int iterations = ReuseTree(fen);
+std::string MCTS::Search(const std::string& fen, int iterations) {
+    ReuseTree(fen); // Attempt to reuse tree
+    //root = new MCTSNode(fen);
 
     MCTSNode* leaf;
     for(int i = 0; i < iterations; i++) {
@@ -35,6 +35,8 @@ std::string MCTS::Search(const std::string& fen) {
         double rolloutResult = Simulate(leaf);
         Backpropagate(leaf, rolloutResult);
     }
+
+    std::cout << "Num nodes: " << NumNodes(root) << std::endl;
 
     // Return move to make
     root = BestChild(root);
@@ -80,7 +82,7 @@ double MCTS::Simulate(MCTSNode* node) {
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dist(0, 217);
 
-    // "Why 217?" 218 is the known maximum number of possible moves from a reachable position:
+    // "Why 217?" 218 is the known maximum number of possible moves from a *reachable* position:
     // https://chess.stackexchange.com/questions/4490/maximum-possible-movement-in-a-turn
 
     // Set up board state
@@ -134,18 +136,20 @@ MCTSNode* MCTS::BestChild(const MCTSNode* root) {
     // and "robust child" (fusion of the other two strategies).
 }
 
+// Recursively counts the number of children
+int MCTS::NumNodes(const MCTSNode* node) {
+    int numRecursiveChildren = 0;
+    for(MCTSNode* child : node->children) { numRecursiveChildren += NumNodes(child); }
+    return ++numRecursiveChildren;
+}
+
 // Attempt to reuse the MCTS tree from last move.
 // If that isn't possible, generate a new tree.
-int MCTS::ReuseTree(const std::string& fen) {
-    // number of iterations to perform when creating
-    // a new tree vs. when reusing the tree
-    const int ITERATIONS_NEW = 5000;
-    const int ITERATIONS_REUSED = 500;
-
+void MCTS::ReuseTree(const std::string& fen) {
     // no tree exists, create new tree
     if(nullptr == root) {
         root = new MCTSNode(fen);
-        return ITERATIONS_NEW;
+        return;
     }
 
     // check if one of the child nodes can become reused tree
@@ -154,11 +158,11 @@ int MCTS::ReuseTree(const std::string& fen) {
             child->parent = nullptr;
             root->DeleteOtherChildren(child);
             root = child;
-            return ITERATIONS_REUSED;
+            return;
         }
     }
 
     // opponent's move didn't match any children; create new tree
     root = new MCTSNode(fen);
-    return ITERATIONS_NEW;
+    return;
 }

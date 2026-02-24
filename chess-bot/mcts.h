@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <random>
 #include <vector>
@@ -33,10 +34,9 @@ public:
 
 class MCTS {
 public:
-    std::string Search(const std::string& fen);
-    ~MCTS() {
-        if(nullptr != root) { delete root; }
-    }
+    ~MCTS() { if(nullptr != root) { delete root; } }
+
+    std::string Search(const std::string& fen, int iterations = 500);
 
 private:
     MCTSNode* root = nullptr;
@@ -49,8 +49,6 @@ private:
 
     // Helpers //
     MCTSNode* BestChild(const MCTSNode* root);
-
-    // returns the number of iterations to perform
-    // perform more when generating a new tree
-    int ReuseTree(const std::string& fen);
+    void ReuseTree(const std::string& fen);
+    int NumNodes(const MCTSNode* node);
 };

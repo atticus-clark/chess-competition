@@ -20,10 +20,14 @@ std::string ChessSimulator::Move(std::string fen) {
   // extra points if you create your own board/move representation instead of
   // using the one provided by the library
 
+  /* Code for alternating chessbots for MCTS assignment
   chess::Board board(fen);
-
+  
   if(board.sideToMove() == chess::Color::WHITE) { return mctsWhite.Search(fen); }
   else if(board.sideToMove() == chess::Color::BLACK) { return randomBot.Move(fen); }
   
   else { return ""; } // chess::Color::NONE is a thing for some reason, so this handles that
+  */
+
+  return mctsWhite.Search(fen);
 }

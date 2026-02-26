@@ -24,17 +24,31 @@ void MCTSNode::DeleteOtherChildren(const MCTSNode* save) {
 
 // ---------------------------------------- MCTS (process) ---------------------------------------- //
 
-std::string MCTS::Search(const std::string& fen, int iterations) {
-    ReuseTree(fen); // Attempt to reuse tree
-    //root = new MCTSNode(fen);
+std::string MCTS::Search(const std::string& fen, int64_t timeLimitMS) {
+    // Time limit setup
+    using namespace std::chrono;
+    steady_clock::time_point startTime = steady_clock::now();
+    steady_clock::time_point currentTime;
+    duration<int64_t, std::milli> timeElapsed;
 
+    //ReuseTree(fen); // Attempt to reuse tree
+    
+    // reusing tree causes tree to grow much larger
+    // worried about memory constraint for comp
+    if(nullptr != root) { delete root; }
+    root = new MCTSNode(fen);
+
+    // MCTS loop
     MCTSNode* leaf;
-    for(int i = 0; i < iterations; i++) {
+    do {
         leaf = Select(root);
         leaf = Expand(leaf);
         double rolloutResult = Simulate(leaf);
         Backpropagate(leaf, rolloutResult);
-    }
+
+        currentTime = steady_clock::now();
+        timeElapsed = duration_cast<duration<int64_t, std::milli>>(currentTime - startTime);
+    } while(timeElapsed.count() < timeLimitMS);
 
     std::cout << "Num nodes: " << NumNodes(root) << std::endl;
 
@@ -163,6 +177,7 @@ void MCTS::ReuseTree(const std::string& fen) {
     }
 
     // opponent's move didn't match any children; create new tree
+    delete root;
     root = new MCTSNode(fen);
     return;
 }

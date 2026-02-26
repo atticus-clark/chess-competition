@@ -1,3 +1,4 @@
+#include <chrono>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -36,7 +37,7 @@ class MCTS {
 public:
     ~MCTS() { if(nullptr != root) { delete root; } }
 
-    std::string Search(const std::string& fen, int iterations = 500);
+    std::string Search(const std::string& fen, int64_t timeLimitMS = 9990);
 
 private:
     MCTSNode* root = nullptr;

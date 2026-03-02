@@ -46,6 +46,7 @@ int NegaMax::Search(uint depth, int alpha, int beta) {
         board.makeMove(moves[i]);
         int score = -Search(depth-1, -beta, -alpha);
         board.unmakeMove(moves[i]);
+
         if(score > bestScore) {
             bestScore = score;
             if(score > alpha) { alpha = score; }
@@ -57,5 +58,5 @@ int NegaMax::Search(uint depth, int alpha, int beta) {
 }
 
 int NegaMax::Evaluate() {
-    return 0;
+    return eval.Evaluate(board);
 }

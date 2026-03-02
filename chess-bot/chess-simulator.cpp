@@ -23,20 +23,12 @@ std::string ChessSimulator::Move(std::string fen) {
   // using the one provided by the library
   
   /*
-  // Code for alternating chessbots for MinMax assignment
+  // Code for alternating chessbots
   chess::Board board(fen);
-  if(board.sideToMove() == chess::Color::WHITE) { return negamax.Move(fen); }
-  else if(board.sideToMove() == chess::Color::BLACK) { return randomBot.Move(fen); }
+  if(board.sideToMove() == chess::Color::BLACK) { return negamax.Move(fen, 4); }
+  else if(board.sideToMove() == chess::Color::WHITE) { return mcts.Move(fen, 2990); }
   else { return ""; } // chess::Color::NONE is a thing for some reason, so this handles that
   */
 
-  /*
-  // Code for alternating chessbots for MCTS assignment
-  chess::Board board(fen);
-  if(board.sideToMove() == chess::Color::WHITE) { return mcts.Search(fen); }
-  else if(board.sideToMove() == chess::Color::BLACK) { return randomBot.Move(fen); }
-  else { return ""; } // chess::Color::NONE is a thing for some reason, so this handles that
-  */
-
-  return mcts.Search(fen);
+  return negamax.Move(fen); // this one seems to be better, use for midterm tournaments
 }

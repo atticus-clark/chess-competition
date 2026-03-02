@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <stack>
 #include "chess.hpp"
 #include "evaluation.h"
 
@@ -9,8 +10,8 @@ public:
     std::string Move(const std::string& fen, uint depth = 2);
 
 private:
+    Eval eval;
     chess::Board board;
-    Evaluation eval;
     // TODO: time limit
     // TODO: start time
     

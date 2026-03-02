@@ -37,7 +37,7 @@ class MCTS {
 public:
     ~MCTS() { if(nullptr != root) { delete root; } }
 
-    std::string Search(const std::string& fen, int64_t timeLimitMS = 9990);
+    std::string Move(const std::string& fen, int64_t timeLimitMS = 9990);
 
 private:
     MCTSNode* root = nullptr;

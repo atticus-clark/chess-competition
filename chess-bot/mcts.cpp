@@ -24,7 +24,7 @@ void MCTSNode::DeleteOtherChildren(const MCTSNode* save) {
 
 // ---------------------------------------- MCTS (process) ---------------------------------------- //
 
-std::string MCTS::Search(const std::string& fen, int64_t timeLimitMS) {
+std::string MCTS::Move(const std::string& fen, int64_t timeLimitMS) {
     // Time limit setup
     using namespace std::chrono;
     steady_clock::time_point startTime = steady_clock::now();

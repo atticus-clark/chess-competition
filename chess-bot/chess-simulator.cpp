@@ -2,7 +2,6 @@
 // disservin's lib. drop a star on his hard work!
 // https://github.com/Disservin/chess-library
 #include "chess.hpp"
-#include <random>
 
 #include "randombot.h"
 #include "negamax.h"
@@ -10,11 +9,11 @@
 
 using namespace ChessSimulator;
 
-RandomBot randomBot;
+//RandomBot randomBot;
 NegaMax negamax;
 MCTS mcts;
 
-std::string ChessSimulator::Move(std::string fen) {
+std::string ChessSimulator::Move(std::string fen, int timeLimitMS) {
   // create your board based on the board string following the FEN notation
   // search for the best move using minimax / monte carlo tree search /
   // alpha-beta pruning / ... try to use nice heuristics to speed up the search
@@ -25,10 +24,10 @@ std::string ChessSimulator::Move(std::string fen) {
   /*
   // Code for alternating chessbots
   chess::Board board(fen);
-  if(board.sideToMove() == chess::Color::BLACK) { return negamax.Move(fen, 4); }
-  else if(board.sideToMove() == chess::Color::WHITE) { return mcts.Move(fen, 2990); }
+  if(board.sideToMove() == chess::Color::BLACK) { return negamax.Move(fen, 1000); }
+  else if(board.sideToMove() == chess::Color::WHITE) { return mcts.Move(fen, 1000); }
   else { return ""; } // chess::Color::NONE is a thing for some reason, so this handles that
   */
 
-  return negamax.Move(fen); // this one seems to be better, use for midterm tournaments
+  return negamax.Move(fen, 1000); // this one seems to be better, use for midterm tournament
 }

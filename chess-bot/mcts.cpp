@@ -50,7 +50,7 @@ std::string MCTS::Move(const std::string& fen, int64_t timeLimitMS) {
         timeElapsed = duration_cast<duration<int64_t, std::milli>>(currentTime - startTime);
     } while(timeElapsed.count() < timeLimitMS);
 
-    std::cout << "Num nodes: " << NumNodes(root) << std::endl;
+    //std::cout << "Num nodes: " << NumNodes(root) << std::endl;
 
     // Return move to make
     root = BestChild(root);

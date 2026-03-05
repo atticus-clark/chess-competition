@@ -8,16 +8,15 @@
 
 class Eval {
 public:
-    int Evaluate(chess::Board board) {
-        // game over checks
-        chess::GameResult result = board.isGameOver().second;
-        chess::Color sideToMove = board.sideToMove();
-        //if(chess::GameResult::DRAW == result) { return 0; }
-        if(chess::GameResult::LOSE == result) {
-            return sideToMove == chess::Color::WHITE ? std::numeric_limits<int>::min()+1 : std::numeric_limits<int>::max();
-        }
+    const int MATE = 100000;
+    const int INF  = 999999;
 
-        bool endgame = IsEndgame(board);
+    int Evaluate(chess::Board& board) {
+        // check checkmate
+        chess::GameResult result = board.isGameOver().second;
+        if(chess::GameResult::LOSE == result) { return -MATE; }
+
+        int phase = CalculatePhase(board);
         int score = 0;
         chess::Piece piece;
 
@@ -55,46 +54,45 @@ public:
                     score -= VALUE_QUEEN + PST_QUEEN[i];
                     break;
                 case chess::Piece::WHITEKING:
-                    score += VALUE_KING + (endgame ? PST_KING_WHITE_END[i] : PST_KING_WHITE[i]);
+                    score += VALUE_KING + TaperedEval(phase, PST_KING_WHITE[i], PST_KING_WHITE_END[i]);
                     break;
                 case chess::Piece::BLACKKING:
-                    score -= VALUE_KING + (endgame ? PST_KING_BLACK_END[i] : PST_KING_BLACK[i]);
+                    score -= VALUE_KING + TaperedEval(phase, PST_KING_BLACK[i], PST_KING_BLACK_END[i]);
                     break;
                 default: break;
             }
         }
         
-        return sideToMove == chess::Color::WHITE ? score : -score;
+        return board.sideToMove() == chess::Color::WHITE ? score : -score;
     }
 
-    bool IsEndgame(chess::Board board) {
-        // Michniewski's definition
-        // 1) Both sides have no queens
-        // 2) Each side that has a queen has one minor piece max
-        // where minor piece == knight or bishop
-
-        chess::Bitboard bitboard;
-        bool wQueens = false, bQueens = false;
-        int wMinors = 0, bMinors = 0;
-
-        // get number of queens and minor pieces for each side
-        bitboard = board.pieces(chess::PieceType::QUEEN, chess::Color::WHITE);
-        wQueens = !bitboard.empty();
-        bitboard = board.pieces(chess::PieceType::QUEEN, chess::Color::BLACK);
-        bQueens = !bitboard.empty();
-        
-        bitboard = board.pieces(chess::PieceType::BISHOP, chess::Color::WHITE)
-            | board.pieces(chess::PieceType::KNIGHT, chess::Color::WHITE);
-        wMinors = bitboard.count();
-        bitboard = board.pieces(chess::PieceType::BISHOP, chess::Color::BLACK)
-            | board.pieces(chess::PieceType::KNIGHT, chess::Color::BLACK);
-        bMinors = bitboard.count();
-
-        // determine endgame status
-        return !((wQueens && 1 < wMinors) || (bQueens && 1 < bMinors));
+    int PieceValue(chess::PieceType piece) {
+        switch(piece.internal()) {
+            case chess::PieceType::PAWN: return VALUE_PAWN;
+            case chess::PieceType::KNIGHT: return VALUE_KNIGHT;
+            case chess::PieceType::BISHOP: return VALUE_BISHOP;
+            case chess::PieceType::ROOK: return VALUE_ROOK;
+            case chess::PieceType::QUEEN: return VALUE_QUEEN;
+            case chess::PieceType::KING: return VALUE_KING;
+            default: return 0;
+        }
     }
 
 private:
+    int TaperedEval(int phase, int mg, int eg) { return (mg * phase + eg * (24 - phase)) / 24; }
+
+    int CalculatePhase(chess::Board& board) {
+        int phase = 0;
+
+        // Pawns have no value for phase calculation
+        phase += board.pieces(chess::PieceType::KNIGHT).count();
+        phase += board.pieces(chess::PieceType::BISHOP).count();
+        phase += board.pieces(chess::PieceType::ROOK).count() * 2;
+        phase += board.pieces(chess::PieceType::QUEEN).count() * 4;
+
+        return phase;
+    }
+    
     const int VALUE_PAWN = 100;
     const int VALUE_KNIGHT = 320;
     const int VALUE_BISHOP = 330;

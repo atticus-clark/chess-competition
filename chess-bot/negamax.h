@@ -15,7 +15,7 @@ private:
     chess::Board board;
 
     // Iterative Deepening
-    const int MAX_DEPTH = 16;
+    const int MAX_DEPTH = 64;
     const int MAX_DEPTH_QUIESCENCE = 6;
     const int BUDGET_PERCENT = 85; // budget to only use 85% of provided time to deal with OS jitter
 

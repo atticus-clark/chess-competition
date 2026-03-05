@@ -16,7 +16,8 @@ public:
         chess::GameResult result = board.isGameOver().second;
         if(chess::GameResult::LOSE == result) { return -MATE; }
 
-        int phase = CalculatePhase(board);
+        bool endgame = IsEndgame(board);
+        //int phase = CalculatePhase(board);
         int score = 0;
         chess::Piece piece;
 
@@ -54,10 +55,12 @@ public:
                     score -= VALUE_QUEEN + PST_QUEEN[i];
                     break;
                 case chess::Piece::WHITEKING:
-                    score += VALUE_KING + TaperedEval(phase, PST_KING_WHITE[i], PST_KING_WHITE_END[i]);
+                    score += VALUE_KING + endgame ? PST_KING_WHITE_END[i] : PST_KING_WHITE[i];
+                    //score += VALUE_KING + TaperedEval(phase, PST_KING_WHITE[i], PST_KING_WHITE_END[i]);
                     break;
                 case chess::Piece::BLACKKING:
-                    score -= VALUE_KING + TaperedEval(phase, PST_KING_BLACK[i], PST_KING_BLACK_END[i]);
+                    score -= VALUE_KING + endgame ? PST_KING_BLACK_END[i] : PST_KING_BLACK[i];
+                    //score -= VALUE_KING + TaperedEval(phase, PST_KING_BLACK[i], PST_KING_BLACK_END[i]);
                     break;
                 default: break;
             }
@@ -79,6 +82,33 @@ public:
     }
 
 private:
+    bool IsEndgame(chess::Board& board) {
+        // Michniewski's definition
+        // 1) Both sides have no queens
+        // 2) Each side that has a queen has one minor piece max
+        // where minor piece == knight or bishop
+
+        chess::Bitboard bitboard;
+        bool wQueens = false, bQueens = false;
+        int wMinors = 0, bMinors = 0;
+
+        // get number of queens and minor pieces for each side
+        bitboard = board.pieces(chess::PieceType::QUEEN, chess::Color::WHITE);
+        wQueens = !bitboard.empty();
+        bitboard = board.pieces(chess::PieceType::QUEEN, chess::Color::BLACK);
+        bQueens = !bitboard.empty();
+        
+        bitboard = board.pieces(chess::PieceType::BISHOP, chess::Color::WHITE)
+            | board.pieces(chess::PieceType::KNIGHT, chess::Color::WHITE);
+        wMinors = bitboard.count();
+        bitboard = board.pieces(chess::PieceType::BISHOP, chess::Color::BLACK)
+            | board.pieces(chess::PieceType::KNIGHT, chess::Color::BLACK);
+        bMinors = bitboard.count();
+
+        // determine endgame status
+        return !((wQueens && 1 < wMinors) || (bQueens && 1 < bMinors));
+    }
+
     int TaperedEval(int phase, int mg, int eg) { return (mg * phase + eg * (24 - phase)) / 24; }
 
     int CalculatePhase(chess::Board& board) {
